@@ -1,19 +1,36 @@
-# ComputerGraphics
-SKKU ComputerGraphics Course
+# Computer Graphics
+This is the base code for assignments in the SKKU Computer Graphics Course.
 
 ## Installation
 ### PyOpenGL
-PyOpenGL은 다음과 같이 설치 할 수 있다.
-$ pip install PyOpenGL PyOpenGL_accelerate
+You can install PyOpenGL using the following command:
 
-설치 과정에서 문제가 생긴다면 직접 코드를 받아서 설치하는 방법을 추천한다.
+    $ pip install PyOpenGL PyOpenGL_accelerate
 
-코드 다운로드
-git clone https://github.com/mcfletch/pyopengl.git
 
-설치
-$ cd pyopengl
-$ pip install -e .
-$ cd accelerate
-$ pip install -e .
+If you encounter any issues during installation, it is recommended to install it manually by cloning the repository and installing it locally.
 
+To download the code:
+
+    $ git clone https://github.com/mcfletch/pyopengl.git
+
+To install PyOpenGL manually:
+
+    $ cd pyopengl
+    $ pip install -e .
+    $ cd accelerate
+    $ pip install -e .
+
+### PyGLM
+You can install PyGLM from PyPI using pip:
+
+    $ pip install PyGLM
+
+## Execution
+You can run the sample code using the following command:
+
+    $ python main.py
+
+You can then see the result, as shown in the image below.
+
+![Example Image](./example.png)

@@ -27,24 +27,22 @@ def display():
 
     draw_axes()
 
-    # 구 그리기
+    # 정육면체 그리기
     glPushMatrix()
     # # 행렬의 곱을 통한 변환 적용
     translate = glm.translate(glm.mat4(1.0), glm.vec3(0, 0, 3))  # 이동 행렬
     rotate = glm.rotate(glm.mat4(1.0), glm.radians(45), glm.vec3(1, 0, 0))  # Z축 기준 45도 회전    
     transform_matrix = translate * rotate    
-    glMultMatrixf(glm_to_opengl_matrix(transform_matrix))  # OpenGL에 변환 행렬 적용    
-    glColor3f(1.0, 0.5, 0.0)  # 주황색 구
+    glMultMatrixf(glm_to_opengl_matrix(transform_matrix))  # OpenGL에 변환 행렬 적용        
     draw_colored_cube(0.5)
     glPopMatrix()
-
-    # 구 그리기
-    glPushMatrix()
-    glColor3f(0, 1, 0.0)   
+    
+    # 정육면체 그리기
+    glPushMatrix()    
     transform_matrix = rotate * translate   
     glMultMatrixf(glm_to_opengl_matrix(transform_matrix))  # OpenGL에 변환 행렬 적용
     draw_colored_cube(0.5)
-    glPopMatrix()
+    glPopMatrix()    
 
     glutSwapBuffers()  # 화면 업데이트
 
@@ -66,7 +64,7 @@ def main():
     glutInitWindowSize(800, 600)
     glutCreateWindow(b"Example Code")
 
-    # 초기화 설정
+    # 조명 설정
     set_lights()
 
     # 디스플레이 함수 등록

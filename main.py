@@ -4,76 +4,100 @@ from OpenGL.GLU import *
 from utils import draw_colored_cube, draw_axes, set_lights
 
 import glm
-import time
 
-# PyGLM 행렬을 OpenGL에 사용할 수 있는 16개의 값으로 변환하는 함수
-def glm_to_opengl_matrix(matrix):
-    # 4x4 행렬의 각 요소를 추출하여 리스트로 변환 (열 우선 순서로)
-    return [matrix[i][j] for i in range(4) for j in range(4)]
+center = glm.vec3(0, 0, 0)
+eye = glm.vec3(1, 3, 10)
+upVector = glm.vec3(0, 1, 0)
+
+last_x, last_y = 0, 0
+is_rotating = False
+is_translating = False
 
 def display():
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)  # 화면 및 깊이 버퍼 지우기
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
-    # 카메라 설정
-    gluLookAt(1, 3, 10,
-               0, 0, 0, 
-               0, 1, 0)
-    # 현재 시간에 따른 회전
-    current_time = time.time()  # 현재 시간을 초 단위로 가져옴
-    angle = (current_time * 30) % 360  # 30도/초로 회전
-    # 월드에 대해 회전 변환 적용
-    glRotatef(angle, 0, 1.0, 0)
+    # 카메라 설정    
+    gluLookAt(eye.x, eye.y, eye.z,
+              center.x, center.y, center.z,
+              upVector.x, upVector.y, upVector.z)
 
     draw_axes()
-
-    # 정육면체 그리기
-    glPushMatrix()
-    # # 행렬의 곱을 통한 변환 적용
-    translate = glm.translate(glm.mat4(1.0), glm.vec3(0, 0, 3))  # 이동 행렬
-    rotate = glm.rotate(glm.mat4(1.0), glm.radians(45), glm.vec3(1, 0, 0))  # Z축 기준 45도 회전    
-    transform_matrix = translate * rotate    
-    glMultMatrixf(glm_to_opengl_matrix(transform_matrix))  # OpenGL에 변환 행렬 적용        
     draw_colored_cube(0.5)
-    glPopMatrix()
-    
-    # 정육면체 그리기
-    glPushMatrix()    
-    transform_matrix = rotate * translate   
-    glMultMatrixf(glm_to_opengl_matrix(transform_matrix))  # OpenGL에 변환 행렬 적용
-    draw_colored_cube(0.5)
-    glPopMatrix()    
 
-    glutSwapBuffers()  # 화면 업데이트
+    glutSwapBuffers()
 
 def resize(w, h):
-	glViewport(0, 0, w, h)
-	glMatrixMode(GL_PROJECTION)
-	glLoadIdentity()
-	gluPerspective(45.0, w / h, 0.1, 500.0)
-	glMatrixMode(GL_MODELVIEW)
-	glLoadIdentity()
+    glViewport(0, 0, w, h)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(45.0, w / h, 0.1, 500.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
 
+def motion(x, y):
+    """마우스 드래그 이벤트 처리"""
+    global eye, center, upVector, last_x, last_y
+
+    dx = x - last_x
+    dy = y - last_y
+    last_x, last_y = x, y
+
+    if is_rotating:        # 회전
+        center2eye = eye - center
+        rotation = glm.rotate(glm.mat4(1.0), -dx*0.01, glm.vec3(0, 1, 0))
+        rotation = glm.rotate(rotation, -dy*0.01, glm.vec3(1, 0, 0))
+        rotated = glm.vec3(rotation * center2eye)
+        eye = center + rotated
+        
+    elif is_translating:
+        # 평행 이동
+        translation = glm.vec3(-dx, dy, 0) * 0.01
+        eye += translation
+        center += translation
+
+    glutPostRedisplay()
+
+def mouse(button, state, x, y):
+    """마우스 버튼 이벤트 처리"""
+    global last_x, last_y, is_rotating, is_translating
+
+    last_x, last_y = x, y
+
+    if button == GLUT_LEFT_BUTTON:
+        is_rotating = (state == GLUT_DOWN)
+    elif button == GLUT_RIGHT_BUTTON:
+        is_translating = (state == GLUT_DOWN)
+
+def mouse_wheel(button, direction, x, y):
+    """마우스 휠 이벤트 처리 (Zoom In/Out)"""
+    global eye, center  
+    
+    zoom_speed = 0.9 if direction > 0 else 1.1
+    eye = eye*zoom_speed   
+
+    glutPostRedisplay()
+    
 def update(value):
-    glutPostRedisplay()  # 디스플레이 함수 다시 호출 (화면 갱신)
-    glutTimerFunc(16, update, 0)  # 16ms 후에 update 함수 다시 호출 (약 60FPS)
+    glutPostRedisplay()
+    glutTimerFunc(16, update, 0)
 
 def main():
     glutInit()
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
     glutInitWindowSize(800, 600)
-    glutCreateWindow(b"Example Code")
+    glutCreateWindow(b"Camera Control Example")
 
-    # 조명 설정
+    glEnable(GL_DEPTH_TEST)
     set_lights()
 
-    # 디스플레이 함수 등록
     glutReshapeFunc(resize)
     glutDisplayFunc(display)
-    # 16ms 간격으로 update 함수 호출
+    glutMouseFunc(mouse)
+    glutMotionFunc(motion)
+    glutMouseWheelFunc(mouse_wheel) 
     glutTimerFunc(16, update, 0)
 
-    # 이벤트 루프 시작
     glutMainLoop()
 
 if __name__ == "__main__":

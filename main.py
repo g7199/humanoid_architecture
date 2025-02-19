@@ -1,7 +1,8 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-from utils import draw_colored_cube, draw_axes, set_lights
+from utils import draw_axes, set_lights
+from humanoid import draw_humanoid
 
 import glm
 
@@ -23,7 +24,7 @@ def display():
               upVector.x, upVector.y, upVector.z)
 
     draw_axes()
-    draw_colored_cube(0.5)
+    draw_humanoid()
 
     glutSwapBuffers()
 
@@ -80,6 +81,7 @@ def mouse_wheel(button, direction, x, y):
     
 def update(value):
     glutPostRedisplay()
+    print("hahahahaah")
     glutTimerFunc(16, update, 0)
 
 def main():

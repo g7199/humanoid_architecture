@@ -2,6 +2,8 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
+import glm
+
 colors = [
     [1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
@@ -38,6 +40,12 @@ def draw_colored_cube(size_x, size_y=-1, size_z=-1):
         for j in range(4):
             glVertex3fv(vertices[i * 4 + j])
     glEnd()
+    glPopMatrix()
+
+def draw_colored_sphere(radius):
+    glPushMatrix()
+    glColor3fv(colors[0])
+    glutSolidSphere(radius, 30, 30)
     glPopMatrix()
 
 def draw_axes():
@@ -88,4 +96,30 @@ def set_lights():
     glMaterialfv(GL_FRONT, GL_SPECULAR, specular_reflection)  # 정반사 재질
     glMateriali(GL_FRONT, GL_SHININESS, 1)  # 광택 설정
 
+def rotation_between_vectors(v1, v2):
+    v1 = glm.normalize(v1)
+    v2 = glm.normalize(v2)
+    cos_theta = glm.dot(v1, v2)
+    
+    rotation_axis = glm.cross(v1, v2)
+    s = glm.sqrt((1 + cos_theta) * 2)
+    invs = 1 / s
+    return glm.quat(s * 0.5,
+                    rotation_axis.x * invs,
+                    rotation_axis.y * invs,
+                    rotation_axis.z * invs)
 
+
+def bone_rotation(forward):
+
+    originalDir = glm.vec3(0, 1, 0)
+    if glm.length2(glm.cross(originalDir, forward)) < 1e-6:
+        if glm.dot(originalDir, forward) < 0:
+            rot = glm.angleAxis(glm.pi(), glm.vec3(0, 1, 0))
+        else:
+            rot = glm.quat(1, 0, 0, 0)
+    else:
+        rot = rotation_between_vectors(forward, originalDir)
+
+    print(rot)
+    return rot

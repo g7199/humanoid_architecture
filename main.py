@@ -9,10 +9,16 @@ import glm
 center = glm.vec3(0, 0, 0)
 eye = glm.vec3(1, 3, 10)
 upVector = glm.vec3(0, 1, 0)
+frame_idx = 0
 
 last_x, last_y = 0, 0
 is_rotating = False
 is_translating = False
+
+import json
+
+# JSON 파일 읽기
+
 
 def display():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -24,7 +30,10 @@ def display():
               upVector.x, upVector.y, upVector.z)
 
     draw_axes()
-    draw_humanoid()
+    with open("walk_animation.json", "r") as f:
+        data = json.load(f)
+
+    draw_humanoid(data["frames"][frame_idx])
 
     glutSwapBuffers()
 
@@ -80,8 +89,13 @@ def mouse_wheel(button, direction, x, y):
     glutPostRedisplay()
     
 def update(value):
+    global frame_idx
     glutPostRedisplay()
-    print("hahahahaah")
+    frame_idx += 1
+
+    if frame_idx >= 120:
+        frame_idx = 0
+
     glutTimerFunc(16, update, 0)
 
 def main():

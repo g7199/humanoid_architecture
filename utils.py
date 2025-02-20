@@ -120,6 +120,4 @@ def bone_rotation(forward):
             rot = glm.quat(1, 0, 0, 0)
     else:
         rot = rotation_between_vectors(forward, originalDir)
-
-    print(rot)
     return rot

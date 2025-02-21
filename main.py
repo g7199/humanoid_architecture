@@ -53,16 +53,25 @@ def motion(x, y):
     dy = y - last_y
     last_x, last_y = x, y
 
-    if is_rotating:        # 회전
-        center2eye = eye - center
-        rotation = glm.rotate(glm.mat4(1.0), -dx*0.01, glm.vec3(0, 1, 0))
-        rotation = glm.rotate(rotation, -dy*0.01, glm.vec3(1, 0, 0))
-        rotated = glm.vec3(rotation * center2eye)
-        eye = center + rotated
+    if is_rotating:
+        center_eye = eye - center
+        rotation = glm.rotate(glm.mat4(1.0), -dx * 0.01, glm.vec3(0, 1, 0))
+        center_eye = glm.vec3(rotation * glm.vec4(center_eye, 1.0))
+
+        view_direction = glm.normalize(-center_eye)
+        right = glm.normalize(glm.cross(view_direction, upVector))
+
+        rotation = glm.rotate(glm.mat4(1.0), -dy * 0.01, right)
+        center_eye = glm.vec3(rotation * glm.vec4(center_eye, 1.0))
+
+        eye = center + center_eye
+        view_direction = glm.normalize(center - eye)
+        upVector = glm.normalize(glm.cross(right, view_direction))
         
     elif is_translating:
-        # 평행 이동
-        translation = glm.vec3(-dx, dy, 0) * 0.01
+        view_direction = glm.normalize(center - eye)
+        right = glm.normalize(glm.cross(view_direction, upVector))
+        translation = (-dx * right + dy * upVector) * 0.01
         eye += translation
         center += translation
 
